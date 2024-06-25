@@ -1,0 +1,36 @@
+- name: Create LDAP directory
+  file:
+    path: /etc/ldap
+    state: directory
+
+- name: Create LDAP Secret
+  set_fact:
+    ldap_secret: "{{ lookup('ansible.builtin.password', '/dev/null', chars=['ascii_lowercase', 'digits'], length=25) }}"
+
+- name: Configure LDAP Creatential
+  copy:
+    content: "{{ ldap_secret }}"
+    path: /etc/ldap.secret
+    mode: 400
+
+- name: Add Computer Account on UCS
+  command: |
+    udm computers/ubuntu create \
+    --position "cn=computers,${ldap_base}" \
+    --set name=$(hostname) --set password="{{ ldap_secret }}" \
+    --set operatingSystem="Debian" \
+    --set operatingSystemVersion="{{ ansible_distribution_major_version }}"
+  delegate_to: "{{ univention_master_node }}"
+
+- name: Download LDAP CA from Univention Server
+  get_url:
+    url: http://{{ univention_ldap_master }}ucs-root-ca.crt
+    dest: /etc/univention/ssl/ucsCA/CAcert.pem
+
+- name: Configure LDAP
+  copy:
+    content: |
+      TLS_CACERT /etc/univention/ssl/ucsCA/CAcert.pem
+      URI ldap://{{ univention_ldap_master }}:7389
+      BASE {{ univention_ldap_base }}
+    path: /etc/ldap/ldap.conf

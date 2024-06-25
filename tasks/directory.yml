@@ -1,0 +1,12 @@
+- name: Create Univention directory
+  file:
+    path: /etc/univention
+    state: directory
+
+- name: Copy File with Master IP
+  copy:
+    content: |
+      master_ip={{ univention_master_ip }}
+    path: /etc/univention/ucr_master
+    mode: 600
+

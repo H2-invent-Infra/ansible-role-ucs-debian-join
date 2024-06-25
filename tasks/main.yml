@@ -1,0 +1,5 @@
+- include_tasks: directory.yml
+- include_tasks: ldap.yml
+- include_tasks: sssd.yml
+- include_tasks: login.yml
+- include_tasks: kerb5.yml
