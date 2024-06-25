@@ -15,10 +15,10 @@
 
 - name: Add Computer Account on UCS
   command: |
-    udm computers/ubuntu create \
-    --position "cn=computers,${ldap_base}" \
+    udm computers/{{ ansible_distribution | lower }} create \
+    --position "cn=computers,dc={{ univention_ldap_base | join("dc=") }}" \
     --set name=$(hostname) --set password="{{ ldap_secret }}" \
-    --set operatingSystem="Debian" \
+    --set operatingSystem="{{ ansible_distribution }}" \
     --set operatingSystemVersion="{{ ansible_distribution_major_version }}"
   delegate_to: "{{ univention_master_node }}"
 
@@ -32,5 +32,5 @@
     content: |
       TLS_CACERT /etc/univention/ssl/ucsCA/CAcert.pem
       URI ldap://{{ univention_ldap_master }}:7389
-      BASE {{ univention_ldap_base }}
+      BASE dc={{ univention_ldap_base | join("dc=") }}
     path: /etc/ldap/ldap.conf
