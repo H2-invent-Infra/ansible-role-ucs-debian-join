@@ -10,9 +10,7 @@
     dest: /usr/share/pam-configs/ucs_mkhomedir
 
 - name: Run pam-update command
-  command: pam-auth-update --force
-  env:
-    DEBIAN_FRONTEND: noninteractive
+  shell: DEBIAN_FRONTEND=noninteractive pam-auth-update --force    
 
 - name: create LightDM config dir
   file:

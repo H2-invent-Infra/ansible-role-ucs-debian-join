@@ -6,7 +6,7 @@
 - name: Copy File with Master IP
   copy:
     content: |
-      master_ip={{ univention_master_ip }}
-    path: /etc/univention/ucr_master
+      master_ip={{ univention_master_node_ip }}
+    dest: /etc/univention/ucr_master
     mode: 600
 

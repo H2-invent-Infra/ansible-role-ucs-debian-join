@@ -5,7 +5,7 @@
       - libnss-sss
       - libpam-sss
       - libsss-sudo
-      - auth-client-config
+#      - auth-client-config
 
 - name: Configure SSSD
   copy:
@@ -25,22 +25,23 @@
 
       [domain/{{ univention_krb5_realm }}]
       auth_provider = krb5
-      krb5_kdcip = {{ univention_krb5_kdcip }}
       krb5_realm = {{ univention_krb5_realm }}
-      krb5_server = {{ univention_ldap_master }}
-      krb5_kpasswd = {{ univention_ldap_master }}
+      krb5_server = {{ univention_master_node_fqdn }}
+      krb5_kpasswd = {{ univention_master_node_fqdn }}
       id_provider = ldap
-      ldap_uri = ldap://{{ univention_ldap_master }}:7389
+      ldap_uri = ldap://{{ univention_master_node_fqdn }}:7389
       ldap_search_base = {{ univention_ldap_base }}
       ldap_tls_reqcert = never
       ldap_tls_cacert = /etc/univention/ssl/ucsCA/CAcert.pem
       cache_credentials = true
       enumerate = true
-      ldap_default_bind_dn = cn=$(hostname),cn=computers,{{ univention_ldap_base }}
+      ldap_default_bind_dn = cn={{ inventory_hostname }},cn=computers,{{ univention_ldap_base }}
       ldap_default_authtok_type = password
       ldap_default_authtok = {{ ldap_secret }}
     dest: /etc/sssd/sssd.conf 
-    mode: 600
+    mode: 0600
+    owner: root
+    group: root
 
 - name: Setup Auth-Client
   copy:
@@ -79,11 +80,13 @@
               session required pam_unix.so
     dest: /etc/auth-client-config/profile.d/sss
     mode: 600
+  when:
+    - false
 
 - name: Run Auth-Client Command
-  command: pam-auth-update --force
-  env:
-    DEBIAN_FRONTEND: noninteractive
+  shell: DEBIAN_FRONTEND=noninteractive pam-auth-update --force
+#  env:
+#    DEBIAN_FRONTEND: noninteractive
 
 - name: Restart SSSD
   service:

@@ -10,27 +10,32 @@
 - name: Configure LDAP Creatential
   copy:
     content: "{{ ldap_secret }}"
-    path: /etc/ldap.secret
+    dest: /etc/ldap.secret
     mode: 400
 
 - name: Add Computer Account on UCS
   command: |
-    udm computers/{{ ansible_distribution | lower }} create \
-    --position "cn=computers,dc={{ univention_ldap_base | join("dc=") }}" \
-    --set name=$(hostname) --set password="{{ ldap_secret }}" \
+    udm computers/ubuntu create \
+    --position "cn=computers,dc={{ univention_ldap_base | join(",dc=") }}" \
+    --set name={{ inventory_hostname }} --set password="{{ ldap_secret }}" \
     --set operatingSystem="{{ ansible_distribution }}" \
     --set operatingSystemVersion="{{ ansible_distribution_major_version }}"
-  delegate_to: "{{ univention_master_node }}"
+  delegate_to: "{{ univention_master_node_hostname }}"
+
+- name: Create UCS Ca directory
+  file:
+    path: /etc/univention/ssl/ucsCA
+    state: directory
 
 - name: Download LDAP CA from Univention Server
   get_url:
-    url: http://{{ univention_ldap_master }}ucs-root-ca.crt
+    url: http://{{ univention_master_node_fqdn }}ucs-root-ca.crt
     dest: /etc/univention/ssl/ucsCA/CAcert.pem
 
 - name: Configure LDAP
   copy:
     content: |
       TLS_CACERT /etc/univention/ssl/ucsCA/CAcert.pem
-      URI ldap://{{ univention_ldap_master }}:7389
-      BASE dc={{ univention_ldap_base | join("dc=") }}
-    path: /etc/ldap/ldap.conf
+      URI ldap://{{ univention_master_node_fqdn }}:7389
+      BASE {{ univention_ldap_base }}
+    dest: /etc/ldap/ldap.conf

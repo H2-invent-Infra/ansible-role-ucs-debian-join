@@ -1,12 +1,6 @@
-univention_master_hostname: ucs01
-univention_ldap_base:
-  - example
-  - com
+univention_ldap_base: dc=example,dc=com
+univention_krb5_realm: EXAMPLE.COM
+univention_master_node_hostname: ucs01
 
-univention_master_ip: "{{ hostvars[univention_master_hostname].ansible_host }}"
-univention_master_node_fqdn: "{{ univention_master_hostname }}.{{ univention_ldap_base | join('.') }}"
-
-univention_ldap_master: "{{ univention_master_node }}"
-
-univention_krb5_kdcip: "{{ univention_master_ip }}"
-univention_krb5_realm: "{{ univention_ldap_base | upper | join('.') }}"
+univention_master_node_ip: "{{ hostvars[univention_master_node_hostname].ansible_host }}"
+univention_master_node_fqdn: "{{ univention_master_node_hostname }}.{{ univention_krb5_realm | lower }}"
