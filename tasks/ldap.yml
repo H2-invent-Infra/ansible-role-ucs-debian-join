@@ -32,9 +32,10 @@
     state: directory
 
 - name: Download LDAP CA from Univention Server
-  get_url:
-    url: http://{{ univention_master_node_fqdn }}/ucs-root-ca.crt
+  file:
+    src: /usr/local/share/ca-certificates/H2-UCS-ROOT-CA.crt
     dest: /etc/univention/ssl/ucsCA/CAcert.pem
+    state: link
 
 - name: Configure LDAP
   copy:
