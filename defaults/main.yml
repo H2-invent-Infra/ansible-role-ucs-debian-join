@@ -4,3 +4,6 @@ univention_master_node_hostname: ucs01
 
 univention_master_node_ip: "{{ hostvars[univention_master_node_hostname].ansible_host }}"
 univention_master_node_fqdn: "{{ univention_master_node_hostname }}.{{ univention_krb5_realm | lower }}"
+
+
+univention_ldap_provisioning: true

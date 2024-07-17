@@ -20,6 +20,8 @@
     --set name={{ inventory_hostname }} --set password="{{ ldap_secret }}" \
     --set operatingSystem="{{ ansible_distribution }}" \
     --set operatingSystemVersion="{{ ansible_distribution_major_version }}"
+  when:
+    - univention_ldap_provisioning
   delegate_to: "{{ univention_master_node_hostname }}"
 
 - name: Create UCS Ca directory
