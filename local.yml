@@ -15,5 +15,8 @@
     - name: univention_master_node_fqdn
       prompt: Which masternode fqdn do you want to join (ucs01.example.com)
       private: false
+    - name: ldap_secret
+      prompt: LDAP Secret hidden
+      private: true
   tasks:
     - include_tasks: tasks/main.yml
