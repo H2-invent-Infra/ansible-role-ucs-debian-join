@@ -20,8 +20,8 @@
 
       [realms]
       {{ univention_krb5_realm }} = {
-        kdc = {{ univention_krb5_kdcip }} {{ univention_master_node_fqdn }}
-        admin_server = {{ univention_krb5_kdcip }} {{ univention_master_node_fqdn }}
-        kpasswd_server = {{ univention_krb5_kdcip }} {{ univention_master_node_fqdn }}
+        kdc = {{ univention_master_node_ip }} {{ univention_master_node_fqdn }}
+        admin_server = {{ univention_master_node_ip }} {{ univention_master_node_fqdn }}
+        kpasswd_server = {{ univention_master_node_ip }} {{ univention_master_node_fqdn }}
     dest: /etc/krb5.conf
 
