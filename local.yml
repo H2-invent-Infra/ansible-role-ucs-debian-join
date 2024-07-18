@@ -2,21 +2,5 @@
   become: true
   vars:
     univention_ldap_provisioning: false
-  vars_prompt:
-    - name: univention_ldap_base
-      prompt: What LDAP Base do you want to join? (dc=example,dc=com)
-      private: false
-    - name: univention_krb5_realm
-      prompt: What KRB5 Realm do you want to join? (EXAMPLE.COM)
-      private: false
-    - name: univention_master_node_ip
-      prompt: Which masternode ip do you want to join (192.168.2.2)
-      private: false
-    - name: univention_master_node_fqdn
-      prompt: Which masternode fqdn do you want to join (ucs01.example.com)
-      private: false
-    - name: ldap_secret
-      prompt: LDAP Secret hidden
-      private: true
   tasks:
     - include_tasks: tasks/main.yml
