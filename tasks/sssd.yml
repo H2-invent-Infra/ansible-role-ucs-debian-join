@@ -5,7 +5,6 @@
       - libnss-sss
       - libpam-sss
       - libsss-sudo
-#      - auth-client-config
 
 - name: Configure SSSD
   copy:
@@ -35,7 +34,7 @@
       ldap_tls_cacert = /etc/univention/ssl/ucsCA/CAcert.pem
       cache_credentials = true
       enumerate = true
-      ldap_default_bind_dn = cn={{ inventory_hostname }},cn=computers,{{ univention_ldap_base }}
+      ldap_default_bind_dn = cn={{ ansible_hostname }},cn=computers,{{ univention_ldap_base }}
       ldap_default_authtok_type = password
       ldap_default_authtok = {{ ldap_secret }}
     dest: /etc/sssd/sssd.conf 
@@ -43,50 +42,35 @@
     owner: root
     group: root
 
-- name: Setup Auth-Client
+- name: Setup NSSSD for UCS and SSS
   copy:
     content: |
-      [sss]
-      nss_passwd=   passwd:   compat sss
-      nss_group=    group:    compat sss
-      nss_shadow=   shadow:   compat
-      nss_netgroup= netgroup: nis
+      # /etc/nsswitch.conf
+      #
+      # Example configuration of GNU Name Service Switch functionality.
+      # If you have the `glibc-doc-reference' and `info' packages installed, try:
+      # `info libc "Name Service Switch"' for information about this file.
 
-      pam_auth=
-              auth [success=3 default=ignore] pam_unix.so nullok_secure try_first_pass
-              auth requisite pam_succeed_if.so uid >= 500 quiet
-              auth [success=1 default=ignore] pam_sss.so use_first_pass
-              auth requisite pam_deny.so
-              auth required pam_permit.so
+      passwd:         files sss
+      group:          files sss
+      shadow:         files sss
+      gshadow:        files
 
-      pam_account=
-              account required pam_unix.so
-              account sufficient pam_localuser.so
-              account sufficient pam_succeed_if.so uid < 500 quiet
-              account [default=bad success=ok user_unknown=ignore] pam_sss.so
-              account required pam_permit.so
+      hosts:          files mdns4_minimal [NOTFOUND=return] dns
+      networks:       files
 
-      pam_password=
-              password requisite pam_pwquality.so retry=3
-              password sufficient pam_unix.so obscure sha512
-              password sufficient pam_sss.so use_authtok
-              password required pam_deny.so
+      protocols:      db files
+      services:       db files sss
+      ethers:         db files
+      rpc:            db files
 
-      pam_session=
-              session required pam_mkhomedir.so skel=/etc/skel/ umask=0077
-              session optional pam_keyinit.so revoke
-              session required pam_limits.so
-              session [success=1 default=ignore] pam_sss.so
-              session required pam_unix.so
-    dest: /etc/auth-client-config/profile.d/sss
-    mode: 600
-  when:
-    - false
+      netgroup:       nis sss
+      sudoers:        files sss
+      automount:      sss
+    dest: /etc/nsswitch.conf
 
 - name: Run Auth-Client Command
-  shell: DEBIAN_FRONTEND=noninteractive pam-auth-update --force
-#  env:
-#    DEBIAN_FRONTEND: noninteractive
+  shell: sudo pam-auth-update --force
 
 - name: Restart SSSD
   service:

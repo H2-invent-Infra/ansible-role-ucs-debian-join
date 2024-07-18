@@ -24,4 +24,3 @@
         admin_server = {{ univention_master_node_ip }} {{ univention_master_node_fqdn }}
         kpasswd_server = {{ univention_master_node_ip }} {{ univention_master_node_fqdn }}
     dest: /etc/krb5.conf
-

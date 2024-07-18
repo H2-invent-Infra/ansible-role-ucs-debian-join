@@ -1,4 +1,4 @@
-- name: Copy pam configuration
+- name: Copy pam configuration for mkhomedir
   copy:
     content: |
       Name: activate mkhomedir
@@ -9,8 +9,25 @@
           required    pam_mkhomedir.so umask=0022 skel=/etc/skel
     dest: /usr/share/pam-configs/ucs_mkhomedir
 
+- name: Copy pam configuration for local groups
+  copy:
+    content: |
+      Name: activate /etc/security/group.conf
+      Default: yes
+      Priority: 900
+      Auth-Type: Primary
+      Auth:
+          required    pam_group.so use_first_pass
+    dest: /usr/share/pam-configs/local
+
+- name: Add line to group config
+  lineinfile:
+    regexp: '*;*;*;Al0000-2400;audio,cdrom,dialout,floppy,plugdev,adm'
+    line: '*;*;*;Al0000-2400;audio,cdrom,dialout,floppy,plugdev,adm'
+    dest: /etc/security/group.conf
+
 - name: Run pam-update command
-  shell: DEBIAN_FRONTEND=noninteractive pam-auth-update --force    
+  shell: sudo pam-auth-update --force    
 
 - name: create LightDM config dir
   file:
