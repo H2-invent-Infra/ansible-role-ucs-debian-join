@@ -16,16 +16,16 @@
     mode: 400
 
 - name: Add Computer Account on UCS if ldap_provisioning
-  command: |
+  shell: |
     udm computers/linux create \
-    --position "cn=computers,dc={{ univention_ldap_base | join(",dc=") }}" \
+    --position "cn=computers,{{ univention_ldap_base }}" \
     --set name={{ inventory_hostname }} --set password="{{ ldap_secret }}" \
     --set operatingSystem="{{ ansible_distribution }}" \
     --set operatingSystemVersion="{{ ansible_distribution_major_version }}" \
     --set mac={{ ansible_default_ipv4.macaddress }} \
     --set ip={{ ansible_default_ipv4.address }} \
-    --set dnsEntryZoneForward="zoneName={{ univention_host_dns_forward_zone }},cn=dns,{{ univention_ldap_base }}\\ {{ ansible_default_ipv4.address }}" \
-    --set dnsEntryZoneReverse="zoneName={{ univention_host_dns_reverse_zone }},cn=dns,{{ univention_ldap_base }}\\ {{ ansible_default_ipv4.address }}"
+    --set dnsEntryZoneForward="zoneName={{ univention_host_dns_forward_zone }},cn=dns,{{ univention_ldap_base }} {{ ansible_default_ipv4.address }}" \
+    --set dnsEntryZoneReverse="zoneName={{ univention_host_dns_reverse_zone }},cn=dns,{{ univention_ldap_base }} {{ ansible_default_ipv4.address }}"
   delegate_to: "{{ univention_master_node_hostname }}"
   when:
     - univention_ldap_provisioning

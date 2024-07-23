@@ -1,7 +1,7 @@
 - name: Copy pam configuration for mkhomedir
   copy:
     content: |
-      Name: activate mkhomedir
+      Name: activate mkhomedir for UCS
       Default: yes
       Priority: 900
       Session-Type: Additional
@@ -21,13 +21,19 @@
     dest: /usr/share/pam-configs/local
 
 - name: Add line to group config
-  lineinfile:
-    regexp: '*;*;*;Al0000-2400;audio,cdrom,dialout,floppy,plugdev,adm'
-    line: '*;*;*;Al0000-2400;audio,cdrom,dialout,floppy,plugdev,adm'
+  copy:
+    content: |
+      # Group Content for UCS PAM Module
+
+      *;*;*;Al0000-2400;audio,cdrom,dialout,floppy,plugdev,adm
     dest: /etc/security/group.conf
 
-- name: Run pam-update command
-  shell: sudo pam-auth-update --force    
+- name: Run Auth-Client Command
+  shell: "DEBIAN_FRONTEND=noninteractive {{ item }}"
+  with_items:
+    - pam-auth-update --force
+    - pam-auth-update --enable ucs_mkhomedir --force
+    - pam-auth-update --enable local --force
 
 - name: create LightDM config dir
   file:
@@ -35,6 +41,15 @@
     state: directory
 
 - name: Remove users on Login Screen
+  copy:
+    content: |
+      # Add a field for a user name, disable user selection at the login screen
+      [SeatDefaults]
+      greeter-show-manual-login=true
+      greeter-hide-users=true
+    dest: /etc/lightdm/lightdm.conf.d/99-show-manual-userlogin.conf
+
+- name: Remove inital Setup from Gnome
   copy:
     content: |
       # Add a field for a user name, disable user selection at the login screen

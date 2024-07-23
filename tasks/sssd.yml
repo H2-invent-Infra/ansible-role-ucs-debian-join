@@ -70,7 +70,7 @@
     dest: /etc/nsswitch.conf
 
 - name: Run Auth-Client Command
-  shell: sudo pam-auth-update --force
+  shell: DEBIAN_FRONTEND=noninteractive pam-auth-update --force
 
 - name: Restart SSSD
   service:
