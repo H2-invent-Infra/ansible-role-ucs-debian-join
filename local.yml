@@ -1,5 +1,9 @@
 - hosts: localhost
   become: true
+  vars_prompt:
+    - name: ldap_secret
+      private: true
+      prompt: Enter LDAP Secret for this Client
   vars:
     univention_ldap_provisioning: false
   tasks:
